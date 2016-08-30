@@ -10,20 +10,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Process {
+	private static int function = View.getChooseFunction();
+	
+	private static boolean verbose = View.isVerbose();
+	
 	public static long VisitFile(String path){
-    	switch(View.getChooseFunction()){
-    		case 0: return countLines(path);
+    	switch(function){
+    		case 0: return (long) countLines(path);
     		case 1: return countBytes(path);
-    		case 2: return isTarget(path);
+    		case 2: return (long) isTarget(path);
     	}
 		return 0;
     }
 	
-	public static int VisitDirectory(String path){
+	public static float VisitDirectory(String path){
         try{
         	//get all directories
             String[] dirs = getDirectories(path);
-            int count=0; 
+            float count=0; 
             for(int i = 0; i < dirs.length; i++){
             	count += VisitDirectory(dirs[i]);
             }
@@ -31,18 +35,28 @@ public class Process {
             //get all files
             File[] files = getAllFiles(path);
             for(int i = 0; i < files.length; i++){
-            	if( (View.getChooseFunction() == 0 && filePicker(files[i].getName())) || View.getChooseFunction() != 0 )
+            	if( (function == 0 && filePicker(files[i].getName())) || function != 0 )
             			count += VisitFile(files[i].toString());
             }
             
-            String end = null;
-            switch(View.getChooseFunction()){
+            switch(function){
             	case 0: {
-            		end = " line(s).";
+                    if (verbose){
+                    	if((View.isIgnoreBlank() && count != 0) || !View.isIgnoreBlank())
+                    		System.out.println(path.toString() + " -- " + count + " line(s).");
+                    }
             		break;
             	}
             	case 1: {
-            		end = " byte(s).";
+            		if(count >= View.getByteLimit()){
+    					if(count < 1024)
+    						System.out.println(path.toString() + " -- " + count + "B.");
+    					else if(count < 1024 * 1024)
+    						System.out.println(path.toString() + " -- " + count/1024 + "KB.");
+    					else if(count < 1024 * 1024 * 1024)
+    						System.out.println(path.toString() + " -- " + count/(1024 * 1024) + "MB.");
+    					else System.out.println(path.toString() + " -- " + count/(1024 * 1024 * 1024) + "GB.");
+            		}
             		break;
             	}
             	case 2: {
@@ -51,30 +65,26 @@ public class Process {
             		break;
             	}
             }
-            if (View.isVerbose()){
-            	if((View.isIgnoreBlank() && count != 0) || !View.isIgnoreBlank())
-            		System.out.println(path.toString() + " -- " + count + end);
-            }
             return count;
         }
         
         catch (Exception e){
-            if (View.isVerbose())
+            if (verbose)
             	System.out.println("Can't read " + path);
             return 0;
         }
 	}
 	
-    public static int countLines(String path){
+    public static float countLines(String path){
 		try{
 			Path p = Paths.get(path);
 	    	Charset cs = Charset.defaultCharset();
 	    	
 			List<String> lines = Files.readAllLines(p,cs);
 			while(lines.remove("")); //if not ignore blank lines ?
-			int count = lines.size();
+			float count = lines.size();
 
-			if (View.isVerbose()){
+			if (verbose){
         		if((View.isIgnoreBlank() && count != 0) || !View.isIgnoreBlank())
         			System.out.println(path.toString() + " -- " + count + " line(s).");
 			}
@@ -82,7 +92,7 @@ public class Process {
 		}
 		
 		catch (Exception e){
-			if (View.isVerbose())
+			if (verbose)
 				System.out.println("Can't read " + path + " for "+ e);
         return 0;
 		}
@@ -92,17 +102,21 @@ public class Process {
 		try {
 			Path p = Paths.get(path);
 			long bytes = Files.size(p);
-			if (View.isVerbose()){
-				if(bytes >= 1024){
-					if(bytes >= 1048576) System.out.println(path.toString() + " -- " + bytes/1048576 + "MB.");
-					else System.out.println(path.toString() + " -- " + bytes/1024 + "MB.");
+			if (verbose){
+				if(bytes >= View.getByteLimit()){
+					if(bytes < 1024)
+						System.out.println(path.toString() + " -- " + bytes + "B.");
+					else if(bytes < 1024 * 1024)
+						System.out.println(path.toString() + " -- " + bytes/1024 + "KB.");
+					else if(bytes < 1024 * 1024 * 1024)
+						System.out.println(path.toString() + " -- " + bytes/(1024 * 1024) + "MB.");
+					else System.out.println(path.toString() + " -- " + bytes/(1024 * 1024 * 1024) + "GB.");
 				}
-				else System.out.println(path.toString() + " -- " + bytes + "B.");
 			}
 			return bytes;
-		} 
+		}
 		catch (IOException e) {
-			if (View.isVerbose())
+			if (verbose)
 				System.out.println("Can't read " + path + " for "+ e);
 			return 0;
 		}
@@ -116,7 +130,7 @@ public class Process {
 		return false;
 	}
 	
-	public static int isTarget(String path){
+	public static float isTarget(String path){
 		File f = new File(path);
 		String name = f.getName();
 		for(String str:View.getTargets()){
@@ -150,12 +164,12 @@ public class Process {
 	//not use
 	public static boolean pathIsEmpty(String path) {
 		if (path == null || path.length() < 1) {
-			System.err.println("ERROR:给定路径 "+ path +" 不能为空。");
+			System.err.println("Please input something");
 			return false;
 		} 
 		
 		else if (!new File(path).exists()) {
-			System.err.println("ERROR:给定路径 "+ path +" 不存在。");
+			System.err.println(path +"not found");
 			return false;
 			
 		} else return true;

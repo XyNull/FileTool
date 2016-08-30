@@ -50,19 +50,34 @@ public class View {
 
 	private static HashMap<String,Integer> folderList = new HashMap<String,Integer>();
 	
-	private static int sort = 0;
+	private static int sortNum = 0;
     public static int getSort() {
-		return sort;
+		return sortNum;
 	}
 	public static void setSort(int sort) {
-		View.sort = sort;
+		View.sortNum = sort;
 	}
+	
+	private static int byteLimit = 0;
+	public static int getByteLimit() {
+		return byteLimit;
+	}
+	public static void setByteLimit(int byteLimit) {
+		View.byteLimit = byteLimit;
+	}
+
+	private static long start = 0;
 	
 	public static void main(String[] args){
     	System.out.println(Values.Usage);
     	
         Scanner in = new Scanner(System.in);
         rootFolder = in.nextLine().trim();
+        
+    	if(!new File(rootFolder).isDirectory()){
+    		System.err.println("input is not a dierctory");
+    		return;
+    	}
 
         long time = -(controller(in) - new Date().getTime());
         System.out.println("Time: " + time + "ms.");
@@ -73,12 +88,9 @@ public class View {
     }
     
     public static long controller(Scanner in){
-    	long start = 0;
     	//choose function
         System.out.println(Values.functionUsageEn);
     	String function = in.nextLine();
-    	
-    	start = new Date().getTime();
     	
         //process add-ons by each function
         if(function.equals("cl") || function.equals("CountLines")){
@@ -93,7 +105,7 @@ public class View {
             chooseFunction = 1;
             verbose = true;
         	System.out.println(Values.addonsUsageCB);
-            ProcessArgument.countBytes(in.nextInt());
+        	byteLimit = ProcessArgument.countBytes(getAddons(in));
             Process.VisitDirectory(rootFolder);
             System.out.println("\n\n\n");
         }
@@ -103,7 +115,7 @@ public class View {
         	chooseFunction = 2;
         	System.out.println(Values.addonsUsageSF);
         	ProcessArgument.searchFile(getAddons(in));
-        	int i = Process.VisitDirectory(rootFolder);
+        	int i = (int) Process.VisitDirectory(rootFolder);
         	if(i > 0)
         		System.out.println("there are " + i + " file(s) matched in " + rootFolder);
         	else System.out.println("can't find any file");
@@ -119,11 +131,19 @@ public class View {
     public static List<String> getAddons(Scanner in){
     	//input add-ons
     	List<String> addons = new ArrayList<String>();
-    	while(true){
+    	if(chooseFunction == 1){
+    		addons.add(in.nextLine());
+    		addons.add(in.nextLine());
+    		System.out.println("please wait....\n");
+    	}
+    	else{
+    		while(true){
     		String a = in.nextLine();
     		if(a.equals("over")) break;
     		addons.add(a);
+    		}
     	}
+    	start = new Date().getTime();
     	return addons;
     }
 }

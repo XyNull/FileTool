@@ -39,5 +39,7 @@ public class Values {
 	public static String addonsUsageCB = 
 			"Addons:\n"+
 			"Sort number: List x biggst folder in root.\n" +
-			"please input the addons (just ONE number)\n";
+			"Ignore bytes: Ignore smaller than x bytes' file&folder in log. No input, no limits.\n" +
+			"please input the addons\n" +
+			"(ONE number & Enter & x KB/MB/GB)\n";
 }
