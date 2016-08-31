@@ -1,16 +1,12 @@
 package nothing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.io.File;
-import java.io.IOException;
 import java.lang.System;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class View {
@@ -47,8 +43,6 @@ public class View {
 	public static void setChooseFunction(int chooseFunction) {
 		View.chooseFunction = chooseFunction;
 	}
-
-	private static HashMap<String,Integer> folderList = new HashMap<String,Integer>();
 	
 	private static int sortNum = 0;
     public static int getSort() {
@@ -74,9 +68,9 @@ public class View {
         Scanner in = new Scanner(System.in);
         rootFolder = in.nextLine().trim();
         
-    	if(!new File(rootFolder).isDirectory()){
-    		System.err.println("input is not a dierctory");
-    		return;
+    	while(!new File(rootFolder).isDirectory()){
+        	System.err.println("\n\n\n\nAttetion:input error,please input again.\n");
+        	rootFolder = in.nextLine().trim();
     	}
 
         long time = -(controller(in) - new Date().getTime());
@@ -106,8 +100,18 @@ public class View {
             verbose = true;
         	System.out.println(Values.addonsUsageCB);
         	byteLimit = ProcessArgument.countBytes(getAddons(in));
-            Process.VisitDirectory(rootFolder);
-            System.out.println("\n\n\n");
+        	Process.VisitDirectory(rootFolder);
+        	
+            HashMap<Integer,String> a = Process.getFolderList();
+            List<Integer> b = Process.getBytes();
+            Object[] c = b.toArray();
+            Arrays.sort(c);
+            if(sortNum != 0){
+            	System.out.println("\n\nThe " + sortNum + "th most biggst folder:\n");
+            	for(int i = 0; i < sortNum; i++){
+            		Process.conversion((int)c[c.length-1-i], a.get(c[c.length-1-i]));
+            	}
+            }
         }
         
         //search files
@@ -119,9 +123,9 @@ public class View {
         	if(i > 0)
         		System.out.println("there are " + i + " file(s) matched in " + rootFolder);
         	else System.out.println("can't find any file");
-        }
+         }
         else {
-        	System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAttetion:input error,please input again.\n");
+        	System.err.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAttetion:input error,please input again.\n");
     		main(new String[1]);
     		return 0;
         }

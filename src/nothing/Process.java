@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Process {
@@ -14,11 +15,24 @@ public class Process {
 	
 	private static boolean verbose = View.isVerbose();
 	
-	public static long VisitFile(String path){
+	private static HashMap<Integer,String> folderList = new HashMap<Integer,String>();
+	public static HashMap<Integer,String> getFolderList() {
+		return folderList;
+	}
+
+	private static List<Integer> bytes = new ArrayList<Integer>();
+	public static List<Integer> getBytes() {
+		return bytes;
+	}
+	public static void setBytes(List<Integer> bytes) {
+		Process.bytes = bytes;
+	}
+
+	public static float VisitFile(String path){
     	switch(function){
-    		case 0: return (long) countLines(path);
+    		case 0: return countLines(path);
     		case 1: return countBytes(path);
-    		case 2: return (long) isTarget(path);
+    		case 2: return isTarget(path);
     	}
 		return 0;
     }
@@ -48,15 +62,9 @@ public class Process {
             		break;
             	}
             	case 1: {
-            		if(count >= View.getByteLimit()){
-    					if(count < 1024)
-    						System.out.println(path.toString() + " -- " + count + "B.");
-    					else if(count < 1024 * 1024)
-    						System.out.println(path.toString() + " -- " + count/1024 + "KB.");
-    					else if(count < 1024 * 1024 * 1024)
-    						System.out.println(path.toString() + " -- " + count/(1024 * 1024) + "MB.");
-    					else System.out.println(path.toString() + " -- " + count/(1024 * 1024 * 1024) + "GB.");
-            		}
+            		folderList.put((int)count,path);
+        			bytes.add((int)count);
+        			conversion(count,path);
             		break;
             	}
             	case 2: {
@@ -98,19 +106,13 @@ public class Process {
 		}
 	}
     
-    public static long countBytes(String path){
+    public static float countBytes(String path){
 		try {
 			Path p = Paths.get(path);
-			long bytes = Files.size(p);
+			float bytes = Files.size(p);
 			if (verbose){
 				if(bytes >= View.getByteLimit()){
-					if(bytes < 1024)
-						System.out.println(path.toString() + " -- " + bytes + "B.");
-					else if(bytes < 1024 * 1024)
-						System.out.println(path.toString() + " -- " + bytes/1024 + "KB.");
-					else if(bytes < 1024 * 1024 * 1024)
-						System.out.println(path.toString() + " -- " + bytes/(1024 * 1024) + "MB.");
-					else System.out.println(path.toString() + " -- " + bytes/(1024 * 1024 * 1024) + "GB.");
+					conversion(bytes,path);
 				}
 			}
 			return bytes;
@@ -196,6 +198,16 @@ public class Process {
 			files[i++] = f;
 		
 		return files;
+	}
+	
+	public static void conversion(float count,String path){
+		if(count < 1024)
+			System.out.println(path.toString() + " -- " + count + "B.");
+		else if(count < 1024 * 1024)
+			System.out.println(path.toString() + " -- " + count/1024 + "KB.");
+		else if(count < 1024 * 1024 * 1024)
+			System.out.println(path.toString() + " -- " + count/(1024 * 1024) + "MB.");
+		else System.out.println(path.toString() + " -- " + count/(1024 * 1024 * 1024) + "GB.");
 	}
 
 }

@@ -16,7 +16,8 @@ public class ProcessArgument {
     }
     
     public static int countBytes(List<String> args){
-    	View.setSort(Integer.parseInt(String.valueOf(args.get(0).charAt(0))));
+    	if(!args.get(0).equals(""))
+    		View.setSort(Integer.parseInt(String.valueOf(args.get(0).charAt(0))));
     	
     	String limit = args.get(1);
     	if(limit.equals("")) return Integer.MIN_VALUE;
