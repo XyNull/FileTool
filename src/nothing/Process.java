@@ -11,11 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Process {
-	private static int function = View.getChooseFunction();
-	
 	private static boolean verbose = View.isVerbose();
 	
-	private static HashMap<Integer,String> folderList = new HashMap<Integer,String>();
+	private static HashMap<Integer,String> folderList = new HashMap<>();
 	public static HashMap<Integer,String> getFolderList() {
 		return folderList;
 	}
@@ -28,7 +26,10 @@ public class Process {
 		Process.bytes = bytes;
 	}
 
+	private static List<String> levelOnePath = new ArrayList<>();
+
 	public static float VisitFile(String path){
+		int function = View.getChooseFunction();
     	switch(function){
     		case 0: return countLines(path);
     		case 1: return countBytes(path);
@@ -36,35 +37,49 @@ public class Process {
     	}
 		return 0;
     }
-	
+
+    public static void preProcess(String path){
+		String[] dirs = getDirectories(path);
+		for (String dir :
+				dirs) {
+			levelOnePath.add(dir);
+		}
+	}
+
 	public static float VisitDirectory(String path){
+		int function = View.getChooseFunction();
         try{
         	//get all directories
             String[] dirs = getDirectories(path);
-            float count=0; 
-            for(int i = 0; i < dirs.length; i++){
-            	count += VisitDirectory(dirs[i]);
-            }
+            float count=0;
+			for (String dir:
+				 dirs) {
+				count += VisitDirectory(dir);
+			}
 
             //get all files
             File[] files = getAllFiles(path);
-            for(int i = 0; i < files.length; i++){
-            	if( (function == 0 && filePicker(files[i].getName())) || function != 0 )
-            			count += VisitFile(files[i].toString());
-            }
+			for (File file:
+				 files) {
+				if( (function == 0 && filePicker(file.getName())) || function != 0 )
+					count += VisitFile(file.toString());
+			}
             
             switch(function){
             	case 0: {
                     if (verbose){
-                    	if((View.isIgnoreBlank() && count != 0) || !View.isIgnoreBlank())
+                    	if(count != 0 || !View.isIgnoreBlank())
                     		System.out.println(path.toString() + " -- " + count + " line(s).");
                     }
             		break;
             	}
             	case 1: {
-            		folderList.put((int)count,path);
+            		if(levelOnePath.contains(path)){
+            			folderList.put((int)count,path);
+						conversion(count,path);
+					}
         			bytes.add((int)count);
-        			conversion(count,path);
+
             		break;
             	}
             	case 2: {
@@ -82,7 +97,7 @@ public class Process {
             return 0;
         }
 	}
-	
+
     public static float countLines(String path){
 		try{
 			Path p = Paths.get(path);
@@ -93,7 +108,7 @@ public class Process {
 			float count = lines.size();
 
 			if (verbose){
-        		if((View.isIgnoreBlank() && count != 0) || !View.isIgnoreBlank())
+        		if((count != 0) || !View.isIgnoreBlank())
         			System.out.println(path.toString() + " -- " + count + " line(s).");
 			}
 			return count;
@@ -162,8 +177,7 @@ public class Process {
 			dirs[i++] = str;
 		return dirs;
 	}
-	
-	//not use
+
 	public static boolean pathIsEmpty(String path) {
 		if (path == null || path.length() < 1) {
 			System.err.println("Please input something");
@@ -181,14 +195,14 @@ public class Process {
 		List<File> temp = new ArrayList<File>();
 		File rootPath = new File(path);
 		File[] items = rootPath.listFiles();
-		
-		for (int i = 0; i < items.length; i++) {
-			if (items[i].exists()) {
-				if (items[i].isFile()) 
-					temp.add(items[i]);
-				else if (items[i].isDirectory()) 
-					getAllFiles(items[i].getPath());
-				
+
+		for (File item :
+				items) {
+			if (item.exists()) {
+				if (item.isFile())
+					temp.add(item);
+				else if (item.isDirectory())
+					getAllFiles(item.getPath());
 			}
 		}
 		
@@ -201,13 +215,19 @@ public class Process {
 	}
 	
 	public static void conversion(float count,String path){
-		if(count < 1024)
-			System.out.println(path.toString() + " -- " + count + "B.");
-		else if(count < 1024 * 1024)
-			System.out.println(path.toString() + " -- " + count/1024 + "KB.");
-		else if(count < 1024 * 1024 * 1024)
-			System.out.println(path.toString() + " -- " + count/(1024 * 1024) + "MB.");
-		else System.out.println(path.toString() + " -- " + count/(1024 * 1024 * 1024) + "GB.");
+		int temp = 0;
+		String[] digit = {"","K","M","G","T"};
+		while(true){
+			if(count < 1024){
+				System.out.println(path + "--" + count + digit[temp] + "B.");
+				break;
+			}
+			else {
+				temp++;
+				count /= 1024;
+			}
+
+		}
 	}
 
 }

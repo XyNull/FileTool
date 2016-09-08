@@ -1,13 +1,8 @@
 package nothing;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.io.File;
 import java.lang.System;
-import java.util.Scanner;
 
 public class View {
     private static String rootFolder;
@@ -73,6 +68,8 @@ public class View {
         	rootFolder = in.nextLine().trim();
     	}
 
+		Process.preProcess(rootFolder);
+
         long time = -(controller(in) - new Date().getTime());
         System.out.println("Time: " + time + "ms.");
         
@@ -102,15 +99,23 @@ public class View {
         	byteLimit = ProcessArgument.countBytes(getAddons(in));
         	Process.VisitDirectory(rootFolder);
         	
-            HashMap<Integer,String> a = Process.getFolderList();
-            List<Integer> b = Process.getBytes();
-            Object[] c = b.toArray();
-            Arrays.sort(c);
+            HashMap<Integer,String> folderList = Process.getFolderList();
+            List<Integer> Bytes = Process.getBytes();
+			Collections.sort(Bytes);
+			Collections.reverse(Bytes);
+
             if(sortNum != 0){
-            	System.out.println("\n\nThe " + sortNum + "th most biggst folder:\n");
-            	for(int i = 0; i < sortNum; i++){
-            		Process.conversion((int)c[c.length-1-i], a.get(c[c.length-1-i]));
-            	}
+            	System.out.println("\n\nThe " + sortNum + "the biggest folder:\n");
+				int i = 0;
+				for (int btyes :
+						Bytes) {
+					if(i < sortNum){
+						if(folderList.get(btyes) != null){
+							Process.conversion(btyes, folderList.get(btyes));
+							i++;
+						}
+					}
+				}
             }
         }
         
