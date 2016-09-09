@@ -11,9 +11,6 @@ public class View {
     public static List<String> getTargets() {
 		return targets;
 	}
-	public static void setTargets(List<String> targets) {
-		View.targets = targets;
-	}
 
 	private static boolean ignoreBlank = false;
     private static boolean verbose = false;
@@ -35,14 +32,8 @@ public class View {
     public static int getChooseFunction() {
 		return chooseFunction;
 	}
-	public static void setChooseFunction(int chooseFunction) {
-		View.chooseFunction = chooseFunction;
-	}
 	
 	private static int sortNum = 0;
-    public static int getSort() {
-		return sortNum;
-	}
 	public static void setSort(int sort) {
 		View.sortNum = sort;
 	}
@@ -50,9 +41,6 @@ public class View {
 	private static int byteLimit = 0;
 	public static int getByteLimit() {
 		return byteLimit;
-	}
-	public static void setByteLimit(int byteLimit) {
-		View.byteLimit = byteLimit;
 	}
 
 	private static long start = 0;

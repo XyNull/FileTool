@@ -18,12 +18,9 @@ public class Process {
 		return folderList;
 	}
 
-	private static List<Integer> bytes = new ArrayList<Integer>();
+	private static List<Integer> bytes = new ArrayList<>();
 	public static List<Integer> getBytes() {
 		return bytes;
-	}
-	public static void setBytes(List<Integer> bytes) {
-		Process.bytes = bytes;
 	}
 
 	private static List<String> levelOnePath = new ArrayList<>();
@@ -51,16 +48,18 @@ public class Process {
         try{
         	//get all directories
             String[] dirs = getDirectories(path);
-            float count=0;
-			for (String dir:
-				 dirs) {
-				count += VisitDirectory(dir);
+			float count=0;
+			if(dirs.length != 0){
+				for (String dir:
+						dirs) {
+					count += VisitDirectory(dir);
+				}
 			}
 
             //get all files
             File[] files = getAllFiles(path);
 			for (File file:
-				 files) {
+				 	files) {
 				if( (function == 0 && filePicker(file.getName())) || function != 0 )
 					count += VisitFile(file.toString());
 			}
@@ -69,12 +68,12 @@ public class Process {
             	case 0: {
                     if (verbose){
                     	if(count != 0 || !View.isIgnoreBlank())
-                    		System.out.println(path.toString() + " -- " + count + " line(s).");
+                    		System.out.println(path + " -- " + count + " line(s).");
                     }
             		break;
             	}
             	case 1: {
-            		if(levelOnePath.contains(path)){
+            		if(levelOnePath.contains(path) && count >= View.getByteLimit()){
             			folderList.put((int)count,path);
 						conversion(count,path);
 					}
@@ -84,7 +83,7 @@ public class Process {
             	}
             	case 2: {
             		if(count >= 1)
-            			System.out.println("there are " + count + " file(s) matched in " + path.toString());
+            			System.out.println("there are " + count + " file(s) matched in " + path);
             		break;
             	}
             }
@@ -125,16 +124,11 @@ public class Process {
 		try {
 			Path p = Paths.get(path);
 			float bytes = Files.size(p);
-			if (verbose){
-				if(bytes >= View.getByteLimit()){
-					conversion(bytes,path);
-				}
-			}
 			return bytes;
 		}
 		catch (IOException e) {
 			if (verbose)
-				System.out.println("Can't read " + path + " for "+ e);
+				System.err.println("Can't read " + path + " for "+ e);
 			return 0;
 		}
 	}
@@ -159,11 +153,11 @@ public class Process {
 
 	public static String[] getDirectories(String path) {
 		if (!pathIsEmpty(path)) {
-			return null;
+			return new String[0];
 		}
 
 		File[] files = new File(path).listFiles();
-		List<String> temp = new ArrayList<String>();
+		List<String> temp = new ArrayList<>();
 		
 		for (File file : files) {
 			if (file.exists() && file.isDirectory()) {
