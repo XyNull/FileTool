@@ -1,4 +1,4 @@
-package nothing;
+package xynull.Values;
 
 public class Values {
 	public static String Usage =
